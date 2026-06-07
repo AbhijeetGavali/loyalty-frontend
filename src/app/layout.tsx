@@ -6,7 +6,7 @@ import { Providers } from "@/providers/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans", adjustFontFallback: false });
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
