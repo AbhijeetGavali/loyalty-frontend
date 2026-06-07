@@ -123,7 +123,7 @@ function LoginPage() {
 
           <div className="font-mono text-[10px] text-stone-500 space-y-1.5 leading-relaxed">
             <p className="text-emerald-500/90">
-              // Real-Time Stamp Monitoring Sync...
+              {"// Real-Time Stamp Monitoring Sync..."}
             </p>
             <p>→ Receipt validation hash verified securely.</p>
             <p className="text-stone-400">

@@ -67,7 +67,7 @@ export default function ScanOnboardingPage() {
     };
 
     onboard();
-  }, [businessId]); // only businessId — no context deps that cause re-runs during hydration
+  }, [businessId, router, toast]);
 
   return (
     <div className="min-h-screen bg-[#0C0A09] flex flex-col items-center justify-center gap-4 px-4">
