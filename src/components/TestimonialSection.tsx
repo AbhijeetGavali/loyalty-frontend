@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   Coffee,
   Smartphone,
-  MessageSquare,
 } from "lucide-react";
 
 export default function TestimonialSection() {
@@ -76,7 +75,7 @@ export default function TestimonialSection() {
                 <span className="text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-900/30 font-bold">
                   30% spike in repeat visits
                 </span>
-                . Our guests love that they don't have to download an extra app,
+                . Our guests love that they don&apos;t have to download an extra app,
                 and the anti-fraud invoice check completely protects our profit
                 margins.”
               </blockquote>

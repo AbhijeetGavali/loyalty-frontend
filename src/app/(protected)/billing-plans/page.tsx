@@ -37,25 +37,25 @@ export default function BillingPlansPage() {
   const createMutation = useMutation({
     mutationFn: (data: object) => api.post("/admin/plans", data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-plans"] }); setShowForm(false); setForm(emptyForm); toast.success("Plan created."); },
-    onError: (err: any) => toast.error(err.message || "Failed to create plan."),
+    onError: (err: Error) => toast.error(err.message || "Failed to create plan."),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: object }) => api.put(`/admin/plans/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-plans"] }); setEditId(null); toast.success("Plan updated."); },
-    onError: (err: any) => toast.error(err.message || "Failed to update plan."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update plan."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/admin/plans/${id}`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-plans"] }); toast.success("Plan deleted."); },
-    onError: (err: any) => toast.error(err.message || "Failed to delete plan."),
+    onError: (err: Error) => toast.error(err.message || "Failed to delete plan."),
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => api.put(`/admin/plans/${id}`, { isActive }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-plans"] }),
-    onError: (err: any) => toast.error(err.message || "Failed to update plan."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update plan."),
   });
 
   function handleSubmit(e: React.FormEvent) {

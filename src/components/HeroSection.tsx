@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles, Coffee, Store, ShieldCheck } from "lucide-react";
+import { ArrowRight, Coffee, Store, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingBean, StampRing, SteamWave } from "./CafeDecorations";
 import { ProductMockupClip } from "./ProductMockupClip";
@@ -41,7 +41,7 @@ export default function HeroSection() {
           <p className="text-lg md:text-xl text-slate-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             Ditch those crinkly, easily lost paper punch cards. Regulars Club
             helps local cafés, bakeshops, and neighborhood spots launch digital
-            stamp cards that open instantly in your customer's browser. Safe for
+            stamp cards that open instantly in your customer&apos;s browser. Safe for
             margins, sweet for retention.
           </p>
 

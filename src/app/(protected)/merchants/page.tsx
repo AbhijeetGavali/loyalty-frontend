@@ -37,7 +37,7 @@ export default function MerchantsPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-merchants"] });
       toast.success("Merchant status updated.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to update status."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update status."),
   });
 
   const filtered = merchants.filter((m) =>

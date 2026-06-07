@@ -2,28 +2,36 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Gift, Sparkles, Loader2, Pencil, X } from "lucide-react";
+import { Gift, Loader2, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+
+interface LoyaltyProgram {
+  id: string;
+  title: string;
+  stampsRequired: number;
+  rewardTitle: string;
+  rewardDescription?: string;
+}
 
 export default function PerkCatalogPage() {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ rewardTitle: "", rewardDescription: "" });
 
-  const { data: programs = [], isLoading } = useQuery<any[]>({
+  const { data: programs = [], isLoading } = useQuery<LoyaltyProgram[]>({
     queryKey: ["loyalty-programs"],
-    queryFn: () => api.get<any[]>("/loyalty-program"),
-    select: (d: any) => (Array.isArray(d) ? d : d ? [d] : []),
+    queryFn: () => api.get<LoyaltyProgram[]>("/loyalty-program"),
+    select: (d: LoyaltyProgram[] | LoyaltyProgram) => (Array.isArray(d) ? d : d ? [d] : []),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => api.put(`/loyalty-program/${id}`, data),
+    mutationFn: ({ id, ...data }: { id: string; rewardTitle: string; rewardDescription: string }) => api.put(`/loyalty-program/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["loyalty-programs"] }); setEditingId(null); },
   });
 
-  const startEdit = (p: any) => {
+  const startEdit = (p: LoyaltyProgram) => {
     setEditingId(p.id);
     setForm({ rewardTitle: p.rewardTitle, rewardDescription: p.rewardDescription || "" });
   };
@@ -41,7 +49,7 @@ export default function PerkCatalogPage() {
         <div className="py-16 text-center text-stone-600 text-sm">No loyalty programs yet. Create one in Stamp Cards first.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {programs.map((p: any) => (
+          {programs.map((p) => (
             <Card key={p.id} className="border-stone-800/80 bg-[#14100E] rounded-2xl p-5 space-y-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">

@@ -10,23 +10,29 @@ import { useToast } from "@/components/ui/toast";
 export default function ProfilePage() {
   const toast = useToast();
 
-  const { data: profile, isLoading, isError } = useQuery<any>({
+  interface CustomerProfile {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  }
+
+  const { data: profile, isLoading, isError } = useQuery<CustomerProfile>({
     queryKey: ["customer-me"],
-    queryFn: () => api.get<any>("/customer/me"),
+    queryFn: () => api.get<CustomerProfile>("/customer/me"),
   });
 
   const profileMutation = useMutation({
     mutationFn: (data: { firstName: string; lastName: string; phone: string }) =>
       api.put("/customer/me", data),
     onSuccess: () => toast.success("Profile updated."),
-    onError: (err: any) => toast.error(err.message || "Failed to update profile."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update profile."),
   });
 
   const pinMutation = useMutation({
     mutationFn: (data: { currentPin: string; newPin: string }) =>
       api.post("/customer/change-pin", data),
     onSuccess: () => toast.success("PIN updated successfully."),
-    onError: (err: any) => toast.error(err.message || "Failed to change PIN."),
+    onError: (err: Error) => toast.error(err.message || "Failed to change PIN."),
   });
 
   function handleProfileSubmit(e: React.FormEvent<HTMLFormElement>) {

@@ -99,12 +99,12 @@ function ConfigPanel() {
   const saveMutation = useMutation({
     mutationFn: (data: FraudConfig) => api.put("/business/fraud-config", data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["fraud-config"] }); toast.success("Config saved."); setForm(null); },
-    onError: (err: any) => toast.error(err.message || "Failed to save config."),
+    onError: (err: Error) => toast.error(err.message || "Failed to save config."),
   });
 
   if (isLoading || !active) return <div className="py-8 flex justify-center"><Loader2 className="size-4 animate-spin text-amber-500" /></div>;
 
-  const set = (key: keyof FraudConfig, val: any) => setForm(f => ({ ...(f ?? active), [key]: val }));
+  const set = (key: keyof FraudConfig, val: FraudConfig[keyof FraudConfig]) => setForm(f => ({ ...(f ?? active), [key]: val }));
   const isDirty = form !== null;
 
   return (
@@ -134,7 +134,7 @@ function ConfigPanel() {
             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{label}</label>
             <input
               type="number" min={min} max={max}
-              value={(active as any)[key]}
+              value={active[key as keyof FraudConfig] as number}
               onChange={e => set(key as keyof FraudConfig, parseInt(e.target.value))}
               className="w-full h-9 px-3 bg-[#0C0A09] border border-stone-800 rounded-xl text-stone-100 text-xs focus:outline-none focus:border-amber-500/50"
             />
@@ -207,7 +207,7 @@ export default function AntiFraudStudioPage() {
       queryClient.invalidateQueries({ queryKey: ["fraud-suspects"] });
       toast.success("Flag resolved.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to resolve."),
+    onError: (err: Error) => toast.error(err.message || "Failed to resolve."),
   });
 
   const filtered = flags.filter((f) => {
@@ -282,8 +282,8 @@ export default function AntiFraudStudioPage() {
           { key: "flags",   label: "Fraud Flags",  icon: ShieldAlert },
           { key: "suspects",label: "Suspects",      icon: Users },
           ...(isOwner ? [{ key: "config", label: "Configuration", icon: Settings2 }] : []),
-        ] as { key: string; label: string; icon: any }[]).map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setTab(key as any)}
+        ] as { key: string; label: string; icon: React.ElementType }[]).map(({ key, label, icon: Icon }) => (
+          <button key={key} onClick={() => setTab(key as "flags" | "suspects" | "config")}
             className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${tab === key ? "bg-[#0C0A09] text-amber-400 border border-stone-900" : "text-stone-500 hover:text-stone-300"}`}>
             <Icon className="size-3" /> {label}
           </button>

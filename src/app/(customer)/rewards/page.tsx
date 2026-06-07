@@ -7,15 +7,29 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 
+interface LoyaltyProgram {
+  stampsRequired: number;
+  rewardTitle: string;
+  rewardDescription?: string;
+}
+
+interface RewardCard {
+  id: string;
+  businessId: string;
+  currentStamps: number;
+  rewardAvailable: boolean;
+  business?: { name: string; loyaltyProgram?: LoyaltyProgram[] };
+}
+
 export default function RewardsPage() {
   const toast = useToast();
 
-  const { data: cards = [], isLoading, isError } = useQuery<any[]>({
+  const { data: cards = [], isLoading, isError } = useQuery<RewardCard[]>({
     queryKey: ["my-cards"],
-    queryFn: () => api.get<any[]>("/cards"),
+    queryFn: () => api.get<RewardCard[]>("/cards"),
     throwOnError: false,
     meta: {
-      onError: (err: any) => toast.error(err.message || "Failed to load rewards."),
+      onError: (err: Error) => toast.error(err.message || "Failed to load rewards."),
     },
   });
 
@@ -40,11 +54,11 @@ export default function RewardsPage() {
         <div className="py-20 text-center space-y-3">
           <Gift className="size-10 text-stone-700 mx-auto" />
           <p className="text-stone-500 text-sm">No rewards yet.</p>
-          <p className="text-stone-600 text-xs">Scan a café's QR code to enrol in a loyalty program.</p>
+          <p className="text-stone-600 text-xs">Scan a café&apos;s QR code to enrol in a loyalty program.</p>
         </div>
       )}
 
-      {!isLoading && !isError && cards.map((card: any) => {
+      {!isLoading && !isError && cards.map((card) => {
         const program = card.business?.loyaltyProgram?.[0];
         if (!program) return null;
         const stampsRequired = program.stampsRequired ?? 10;

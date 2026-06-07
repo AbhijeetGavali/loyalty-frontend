@@ -7,6 +7,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
+interface LoyaltyProgram {
+  id: string;
+  title: string;
+  stampsRequired: number;
+  rewardTitle: string;
+  rewardDescription?: string;
+  isActive: boolean;
+}
+
 export default function StampCardsPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"all" | "active" | "paused">("all");
@@ -14,18 +23,18 @@ export default function StampCardsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "" });
 
-  const { data: programs = [], isLoading } = useQuery<any[]>({
+  const { data: programs = [], isLoading } = useQuery<LoyaltyProgram[]>({
     queryKey: ["loyalty-programs"],
-    queryFn: () => api.get<any[]>("/loyalty-program"),
+    queryFn: () => api.get<LoyaltyProgram[]>("/loyalty-program"),
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => api.post("/loyalty-program", data),
+    mutationFn: (data: typeof form) => api.post("/loyalty-program", data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["loyalty-programs"] }); setShowForm(false); },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => api.put(`/loyalty-program/${id}`, data),
+    mutationFn: ({ id, ...data }: typeof form & { id: string }) => api.put(`/loyalty-program/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["loyalty-programs"] }); setEditingId(null); setShowForm(false); },
   });
 
@@ -40,13 +49,13 @@ export default function StampCardsPage() {
     else createMutation.mutate(form);
   };
 
-  const startEdit = (p: any) => {
+  const startEdit = (p: LoyaltyProgram) => {
     setEditingId(p.id);
     setForm({ title: p.title, stampsRequired: p.stampsRequired, rewardTitle: p.rewardTitle, rewardDescription: p.rewardDescription || "" });
     setShowForm(true);
   };
 
-  const filtered = programs.filter((c: any) => filter === "all" || (filter === "active" ? c.isActive : !c.isActive));
+  const filtered = programs.filter((c) => filter === "all" || (filter === "active" ? c.isActive : !c.isActive));
 
   return (
     <div className="space-y-8 animate-fade-in text-stone-200">
@@ -84,7 +93,7 @@ export default function StampCardsPage() {
                 <input
                   type={type}
                   min={type === "number" ? 1 : undefined}
-                  value={(form as any)[key]}
+                  value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: type === "number" ? Number(e.target.value) : e.target.value }))}
                   required={!optional}
                   className="w-full h-10 px-3 bg-[#0C0A09] border border-stone-800 rounded-xl text-stone-100 text-xs focus:outline-none focus:border-amber-500/50"
@@ -122,7 +131,7 @@ export default function StampCardsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filtered.map((p: any) => (
+          {filtered.map((p) => (
             <Card key={p.id} className="border-stone-800/80 bg-[#14100E] rounded-2xl p-5 space-y-4">
               <div className="flex items-start justify-between gap-2">
                 <div>

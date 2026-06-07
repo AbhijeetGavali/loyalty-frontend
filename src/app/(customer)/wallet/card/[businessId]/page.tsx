@@ -9,6 +9,22 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 
+interface LoyaltyCard {
+  id: string;
+  businessId: string;
+  currentStamps: number;
+  totalEarned: number;
+  rewardRedeemedCount: number;
+  rewardAvailable: boolean;
+  business?: {
+    name: string;
+    type?: string;
+    location?: string;
+    googleReviewUrl?: string;
+    loyaltyProgram?: Array<{ stampsRequired: number; rewardTitle: string; rewardDescription?: string }>;
+  };
+}
+
 interface StoreLocation {
   id: string;
   name: string;
@@ -78,9 +94,9 @@ export default function CardDetailPage() {
   const [locationResolved, setLocationResolved] = useState(false);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
 
-  const { data: card, isLoading, isError } = useQuery<any>({
+  const { data: card, isLoading, isError } = useQuery<LoyaltyCard>({
     queryKey: ["card", businessId],
-    queryFn: () => api.get<any>(`/cards/by-business/${businessId}`),
+    queryFn: () => api.get<LoyaltyCard>(`/cards/by-business/${businessId}`),
     enabled: !!businessId,
   });
 
@@ -107,7 +123,7 @@ export default function CardDetailPage() {
       toast.success("Stamp requested! Staff will approve shortly.");
       if (card?.business?.googleReviewUrl) setShowReviewPrompt(true);
     },
-    onError: (err: any) => toast.error(err.message || "Failed to request stamp."),
+    onError: (err: Error) => toast.error(err.message || "Failed to request stamp."),
   });
 
   const redeemMutation = useMutation({
@@ -117,7 +133,7 @@ export default function CardDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["my-cards"] });
       toast.success("Reward claimed! Show this to the staff.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to claim reward."),
+    onError: (err: Error) => toast.error(err.message || "Failed to claim reward."),
   });
 
   async function handleOpenInvoice() {

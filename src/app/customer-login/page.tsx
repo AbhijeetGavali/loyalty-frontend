@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -22,20 +22,19 @@ import {
   ArrowLeft,
   ShieldCheck,
   Store,
-  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/appContext";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 
-export default function CustomerLoginPage() {
+function CustomerLoginPage() {
   const [step, setStep] = useState<"phone" | "pin">("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pinCode, setPinCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { token, setToken } = useAuth();
+  const { setToken } = useAuth();
   const toast = useToast();
   const searchParams = useSearchParams();
 
@@ -53,7 +52,7 @@ export default function CustomerLoginPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setStep("pin");
-    } catch (err) {
+    } catch {
       setError(
         "Something went wrong. Please check your connection and try again.",
       );
@@ -86,8 +85,8 @@ export default function CustomerLoginPage() {
       setToken(response.accessToken);
       toast.success("Welcome! Opening your wallet...");
       router.push(redirectTo);
-    } catch (err: any) {
-      const msg = err.message || "Incorrect PIN. Please try again.";
+    } catch (err) {
+      const msg = (err as Error).message || "Incorrect PIN. Please try again.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -302,5 +301,13 @@ export default function CustomerLoginPage() {
         wallet encryption active.
       </span>
     </div>
+  );
+}
+
+export default function CustomerLoginPageWrapper() {
+  return (
+    <Suspense>
+      <CustomerLoginPage />
+    </Suspense>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Loader2, KeyRound, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams?.get("token") ?? "";
   const router = useRouter();
@@ -30,8 +30,8 @@ export default function ResetPasswordPage() {
       toast.success("Password reset! You can now log in.");
       setDone(true);
       setTimeout(() => router.replace("/login"), 2000);
-    } catch (err: any) {
-      toast.error(err.message || "Reset failed. The link may have expired.");
+    } catch (err) {
+      toast.error((err as Error).message || "Reset failed. The link may have expired.");
     } finally {
       setLoading(false);
     }
@@ -75,5 +75,13 @@ export default function ResetPasswordPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPageWrapper() {
+  return (
+    <Suspense>
+      <ResetPasswordPage />
+    </Suspense>
   );
 }

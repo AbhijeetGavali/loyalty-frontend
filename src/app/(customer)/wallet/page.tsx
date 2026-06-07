@@ -6,17 +6,27 @@ import { useQuery } from "@tanstack/react-query";
 import { Ticket, Coffee, Loader2, ChevronRight, Star } from "lucide-react";
 import { api } from "@/lib/api";
 
+interface WalletCard {
+  id: string;
+  businessId: string;
+  currentStamps: number;
+  totalEarned: number;
+  rewardRedeemedCount: number;
+  rewardAvailable: boolean;
+  business?: { name: string; location?: string; loyaltyProgram?: Array<{ stampsRequired: number }> };
+}
+
 export default function WalletPage() {
   const router = useRouter();
 
-  const { data: cards = [], isLoading, isError } = useQuery<any[]>({
+  const { data: cards = [], isLoading, isError } = useQuery<WalletCard[]>({
     queryKey: ["my-cards"],
-    queryFn: () => api.get<any[]>("/cards"),
+    queryFn: () => api.get<WalletCard[]>("/cards"),
   });
 
   // Only show cards where the user has activity (at least 1 stamp earned or reward redeemed)
   const activeCards = cards.filter(
-    (c: any) => c.totalEarned > 0 || c.rewardRedeemedCount > 0 || c.currentStamps > 0,
+    (c) => c.totalEarned > 0 || c.rewardRedeemedCount > 0 || c.currentStamps > 0,
   );
 
   return (
@@ -42,13 +52,13 @@ export default function WalletPage() {
         <div className="py-20 text-center space-y-3">
           <Ticket className="size-10 text-stone-700 mx-auto" />
           <p className="text-stone-500 text-sm">No cards with stamps yet.</p>
-          <p className="text-stone-600 text-xs">Scan a café's QR code and collect your first stamp.</p>
+          <p className="text-stone-600 text-xs">Scan a café&apos;s QR code and collect your first stamp.</p>
         </div>
       )}
 
       {!isLoading && !isError && activeCards.length > 0 && (
         <div className="space-y-3">
-          {activeCards.map((card: any) => {
+          {activeCards.map((card) => {
             const program = card.business?.loyaltyProgram?.[0];
             const stampsRequired = program?.stampsRequired ?? 10;
             const progress = Math.min((card.currentStamps / stampsRequired) * 100, 100);

@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BarChart3, TrendingUp, TrendingDown, Users, Coffee,
+  BarChart3, TrendingUp, Users, Coffee,
   Gift, ArrowUpRight, ArrowDownRight, Minus, Repeat2,
   ShieldCheck, UserPlus, Activity, DollarSign, Loader2,
   BarChart2,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,6 @@ import {
   CheckCircle2,
   Store,
   MapPin,
-  UtensilsCrossed,
-  Layers,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/appContext";
@@ -51,7 +49,7 @@ const STAMP_MATRIX_OPTIONS = [
   { value: "12", label: "12 Stamps (Enterprise Extended Loop)" },
 ];
 
-export default function RegisterBusinessPage() {
+function RegisterBusinessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -123,8 +121,8 @@ export default function RegisterBusinessPage() {
 
       toast.success("Business registered! Welcome to RegularsClub.");
       router.push(redirectTo);
-    } catch (err: any) {
-      const msg = err.message || "Failed to register. Please try again.";
+    } catch (err) {
+      const msg = (err as Error).message || "Failed to register. Please try again.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -141,7 +139,7 @@ export default function RegisterBusinessPage() {
         router.push(redirectTo);
       }
     }
-  }, [token]);
+  }, [token, redirectTo, router, setToken]);
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#0C0A09] select-none transition-colors duration-500">
@@ -456,5 +454,13 @@ export default function RegisterBusinessPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterBusinessPageWrapper() {
+  return (
+    <Suspense>
+      <RegisterBusinessPage />
+    </Suspense>
   );
 }

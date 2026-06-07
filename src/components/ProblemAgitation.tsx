@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   FileX,
   Zap,
-  Coffee,
   Shield,
   TrendingUp,
 } from "lucide-react";

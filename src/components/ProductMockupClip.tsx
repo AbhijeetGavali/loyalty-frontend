@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Check, Star, Coffee } from "lucide-react";
+import { Check, Coffee } from "lucide-react";
 
 export function ProductMockupClip() {
   const [stamps, setStamps] = useState<boolean[]>([

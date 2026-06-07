@@ -38,7 +38,7 @@ export default function FeaturesBento() {
               </h3>
               <p className="text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl transition-colors group-hover:text-stone-200">
                 Remove the barrier to entry entirely. Customers simply scan your
-                countertop's unique QR code to instantly launch their digital
+                countertop&apos;s unique QR code to instantly launch their digital
                 stamp card right inside their default browser. No App Store
                 downloads, no forgotten passwords, and zero setup fatigue.
               </p>

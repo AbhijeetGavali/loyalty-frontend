@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from "react";
 import {
   HelpCircle,
-  Coffee,
   ArrowRight,
   MessageSquare,
-  HelpCircleIcon,
   CheckCircle2,
 } from "lucide-react";
 import {
@@ -15,23 +13,24 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const conversations = [
+  {
+    q: "Do customers need an app?",
+    a: "No app storefront friction! Just scan the QR code to open a browser card.",
+  },
+  {
+    q: "How are stamps secure?",
+    a: "Invoice-level matching ensures every stamp locks to a verified order bill number.",
+  },
+  {
+    q: "What's the pricing?",
+    a: "Plans start transparently at just ₹999/year. 3-day full access pass included.",
+  },
+];
+
 export default function Faq() {
   // Live help desk chat clip loops
   const [chatCycle, setChatCycle] = useState(0);
-  const conversations = [
-    {
-      q: "Do customers need an app?",
-      a: "No app storefront friction! Just scan the QR code to open a browser card.",
-    },
-    {
-      q: "How are stamps secure?",
-      a: "Invoice-level matching ensures every stamp locks to a verified order bill number.",
-    },
-    {
-      q: "What's the pricing?",
-      a: "Plans start transparently at just ₹999/year. 3-day full access pass included.",
-    },
-  ];
 
   useEffect(() => {
     const chatTimer = setInterval(() => {

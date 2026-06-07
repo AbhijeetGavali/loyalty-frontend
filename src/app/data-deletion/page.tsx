@@ -19,7 +19,7 @@ export default function RefundPolicy() {
                 </h2>
                 <p className="text-muted-foreground mb-4">
                   From the app: Profile → Account → Delete Account. Or email
-                  privacy@ideasprout.in with subject "Account Deletion Request"
+                  privacy@ideasprout.in with subject &quot;Account Deletion Request&quot;
                   and your registered phone number.
                 </p>
                 <h2 className="text-lg font-semibold text-foreground mt-6 mb-3">

@@ -5,11 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Users,
   TrendingUp,
-  TrendingDown,
-  AlertTriangle,
   Star,
-  UserPlus,
-  Clock,
   Repeat2,
   Award,
   Search,

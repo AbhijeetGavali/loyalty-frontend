@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Coffee, Gift, CheckCircle2, Loader2, MapPin } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 
@@ -11,19 +10,35 @@ export default function StampLedgerPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"stamps" | "rewards">("stamps");
 
-  const { data: stampHistory = [], isLoading: isLoadingStamps } = useQuery<any[]>({
+  interface StampRecord {
+    id: string;
+    approvedAt?: string;
+    createdAt: string;
+    customer?: { firstName?: string; lastName?: string; user?: { email?: string } };
+    invoice?: { invoiceNumber?: string };
+    storeLocation?: { name?: string };
+  }
+
+  interface RewardRecord {
+    id: string;
+    approvedAt?: string;
+    requestedAt: string;
+    loyaltyCard?: { customer?: { firstName?: string; lastName?: string } };
+  }
+
+  const { data: stampHistory = [], isLoading: isLoadingStamps } = useQuery<StampRecord[]>({
     queryKey: ["stamp-history"],
-    queryFn: () => api.get<any[]>("/stamp/history"),
+    queryFn: () => api.get<StampRecord[]>("/stamp/history"),
   });
 
-  const { data: rewardHistory = [], isLoading: isLoadingRewards } = useQuery<any[]>({
+  const { data: rewardHistory = [], isLoading: isLoadingRewards } = useQuery<RewardRecord[]>({
     queryKey: ["reward-history"],
-    queryFn: () => api.get<any[]>("/reward/history"),
+    queryFn: () => api.get<RewardRecord[]>("/reward/history"),
   });
 
   const isLoading = isLoadingStamps || isLoadingRewards;
 
-  const stampEntries = stampHistory.map((r: any) => ({
+  const stampEntries = stampHistory.map((r) => ({
     id: r.id,
     type: "stamp" as const,
     customer: `${r.customer?.firstName || ""} ${r.customer?.lastName || ""}`.trim() || "Customer",
@@ -33,7 +48,7 @@ export default function StampLedgerPage() {
     date: r.approvedAt ? new Date(r.approvedAt).toLocaleString() : new Date(r.createdAt).toLocaleString(),
   }));
 
-  const rewardEntries = rewardHistory.map((r: any) => ({
+  const rewardEntries = rewardHistory.map((r) => ({
     id: r.id,
     type: "reward" as const,
     customer: `${r.loyaltyCard?.customer?.firstName || ""} ${r.loyaltyCard?.customer?.lastName || ""}`.trim() || "Customer",

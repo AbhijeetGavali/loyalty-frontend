@@ -41,10 +41,20 @@ function timeAgo(date: string) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+interface StampEntry {
+  id: string;
+  customerId?: string;
+  customer?: { firstName?: string; lastName?: string };
+  invoice?: { invoiceNumber?: string };
+  storeLocation?: { name?: string };
+  approvedAt?: string;
+  createdAt: string;
+}
+
 function StampLedgerFeed() {
-  const { data: history = [], isLoading } = useQuery<any[]>({
+  const { data: history = [], isLoading } = useQuery<StampEntry[]>({
     queryKey: ["stampHistory"],
-    queryFn: () => api.get<any[]>("/stamp/history"),
+    queryFn: () => api.get<StampEntry[]>("/stamp/history"),
     refetchInterval: 30000,
   });
 
@@ -69,7 +79,7 @@ function StampLedgerFeed() {
 
       {!isLoading && recent.length > 0 && (
         <div className="space-y-3">
-          {recent.map((r: any) => {
+          {recent.map((r) => {
             const name = `${r.customer?.firstName || ""} ${r.customer?.lastName || ""}`.trim() || `Customer #${r.customerId?.slice(-4)}`;
             const invoice = r.invoice?.invoiceNumber;
             const location = r.storeLocation?.name;
@@ -120,28 +130,42 @@ export default function DashboardOverview() {
     }>("/business/dashboard"),
   });
 
+  interface PendingStamp {
+    id: string;
+    customerId?: string;
+    createdAt: string;
+    customer?: { firstName?: string; lastName?: string; user?: { email?: string } };
+    invoice?: { invoiceNumber?: string };
+  }
+
+  interface PendingReward {
+    id: string;
+    requestedAt: string;
+    loyaltyCard?: { customer?: { firstName?: string; lastName?: string } };
+  }
+
   // 2. Fetch Pending Stamp Requests
   const {
     data: pendingStamps,
     isLoading: isLoadingStamps,
     isError: isErrorStamps,
-  } = useQuery<any[]>({
+  } = useQuery<PendingStamp[]>({
     queryKey: ["pendingStamps"],
-    queryFn: () => api.get<any[]>("/stamp/pending"),
+    queryFn: () => api.get<PendingStamp[]>("/stamp/pending"),
   });
 
   // 3. Fetch Pending Reward Redemptions
   const {
     data: pendingRewards,
     isLoading: isLoadingRewards,
-  } = useQuery<any[]>({
+  } = useQuery<PendingReward[]>({
     queryKey: ["pendingRewards"],
-    queryFn: () => api.get<any[]>("/reward/pending"),
+    queryFn: () => api.get<PendingReward[]>("/reward/pending"),
   });
 
   // Merge both into a unified queue
   const queueRequests: LedgerRequest[] = [
-    ...(pendingStamps ?? []).map((r: any) => ({
+    ...(pendingStamps ?? []).map((r) => ({
       id: r.id,
       type: "stamp" as const,
       user: `${r.customer?.firstName || ""} ${r.customer?.lastName || ""}`.trim() || `Customer #${r.customerId?.slice(-4)}`,
@@ -150,7 +174,7 @@ export default function DashboardOverview() {
       count: 1,
       date: new Date(r.createdAt).toLocaleTimeString(),
     })),
-    ...(pendingRewards ?? []).map((r: any) => ({
+    ...(pendingRewards ?? []).map((r) => ({
       id: r.id,
       type: "reward" as const,
       user: `${r.loyaltyCard?.customer?.firstName || ""} ${r.loyaltyCard?.customer?.lastName || ""}`.trim() || "Customer",
@@ -179,7 +203,7 @@ export default function DashboardOverview() {
       queryClient.invalidateQueries({ queryKey: ["stampHistory"] });
       toast.success("Request approved successfully.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to approve request."),
+    onError: (err: Error) => toast.error(err.message || "Failed to approve request."),
   });
 
   const rejectMutation = useMutation({
@@ -192,7 +216,7 @@ export default function DashboardOverview() {
       queryClient.invalidateQueries({ queryKey: ["pendingRewards"] });
       toast.success("Request rejected.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to reject request."),
+    onError: (err: Error) => toast.error(err.message || "Failed to reject request."),
   });
 
   const handleInvoiceChange = (id: string, value: string) => {
@@ -361,7 +385,7 @@ export default function DashboardOverview() {
                           </span>{" "}
                           for{" "}
                           <span className="italic text-stone-300">
-                            "{request.detail}"
+                            &quot;{request.detail}&quot;
                           </span>
                         </>
                       ) : (

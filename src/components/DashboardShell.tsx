@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { LogOut, LayoutDashboard, Ticket, Gift, Building, Users } from 'lucide-react';
+import { LogOut, LayoutDashboard, Ticket, Gift, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/appContext';
 

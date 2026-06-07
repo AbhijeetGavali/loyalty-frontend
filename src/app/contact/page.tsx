@@ -4,8 +4,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import {
   Mail,
-  Clock,
-  MessageSquare,
   ShieldCheck,
   HelpCircle,
   ArrowRight,

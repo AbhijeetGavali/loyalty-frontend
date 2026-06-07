@@ -97,7 +97,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       const parsed = JSON.parse(msg);
       if (Array.isArray(parsed))
         msg = parsed
-          .map((e: any) => e.message)
+          .map((e: { message?: string }) => e.message)
           .filter(Boolean)
           .join(", ");
       else if (parsed.message) msg = parsed;

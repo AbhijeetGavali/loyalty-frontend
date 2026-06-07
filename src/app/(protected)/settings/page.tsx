@@ -20,8 +20,6 @@ import {
   Store,
   MapPin,
   Mail,
-  Lock,
-  Trash2,
   ShieldAlert,
   Loader2,
   CheckCircle2,
@@ -51,7 +49,7 @@ const STORE_CLASSIFICATIONS = [
 
 export default function StoreSettingsPage() {
   const router = useRouter();
-  const { token, setToken, role } = useAuth();
+  const { setToken, role } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<"profile" | "billing">("profile");
   useEffect(() => { if (role === 'BUSINESS_STAFF') setActiveTab('profile'); }, [role]);
@@ -100,22 +98,25 @@ export default function StoreSettingsPage() {
   });
 
   // Fetch Current Subscription
+  interface BillingSub { planId?: string; status?: string; trialEndAt?: string; plan?: { name?: string; id?: string; monthlyPrice?: number } }
+  interface BillingPlan { id: string; name: string; code: string; monthlyPrice: number; maxCustomers?: number; maxStaff?: number; maxLocations?: number }
+
   const { data: currentSub, isLoading: isSubLoading } = useQuery({
     queryKey: ["my-subscription"],
-    queryFn: () => api.get<any>("/billing/current"),
+    queryFn: () => api.get<BillingSub>("/billing/current"),
   });
 
   // Fetch Available Plans
   const { data: plans, isLoading: isPlansLoading } = useQuery({
     queryKey: ["subscription-plans"],
-    queryFn: () => api.get<any[]>("/billing/plans"),
+    queryFn: () => api.get<BillingPlan[]>("/billing/plans"),
   });
 
   // Process Subscription Tier Requests
   const subscribeMutation = useMutation({
-    mutationFn: (planId: string) => api.post<any>("/billing/subscribe", { planId }),
+    mutationFn: (planId: string) => api.post<{ url: string }>("/billing/subscribe", { planId }),
     onSuccess: () => toast.info("Redirecting to payment checkout..."),
-    onError: (err: any) => showFeedback("error", err.message || "Payment gateway initiation failed."),
+    onError: (err: Error) => showFeedback("error", err.message || "Payment gateway initiation failed."),
   });
 
   const showFeedback = (type: "success" | "error", text: string) => {
@@ -133,8 +134,8 @@ export default function StoreSettingsPage() {
     try {
       await api.put("/business/me", { name: businessName, type: storeType, location, googleReviewUrl });
       showFeedback("success", "Storefront settings updated successfully.");
-    } catch (err: any) {
-      showFeedback("error", err.message || "Failed to update profile.");
+    } catch (err) {
+      showFeedback("error", (err as Error).message || "Failed to update profile.");
     } finally {
       setUpdating(null);
     }
@@ -152,8 +153,8 @@ export default function StoreSettingsPage() {
       await api.put("/auth/password", { currentPassword, newPassword });
       showFeedback("success", "Password updated successfully.");
       setCurrentPassword(""); setNewPassword(""); setConfirmNewPassword("");
-    } catch (err: any) {
-      showFeedback("error", err.message || "Failed to update password.");
+    } catch (err) {
+      showFeedback("error", (err as Error).message || "Failed to update password.");
     } finally {
       setUpdating(null);
     }
@@ -171,8 +172,8 @@ export default function StoreSettingsPage() {
       setToken(null);
       if (typeof window !== "undefined") localStorage.clear();
       router.push("/login");
-    } catch (err: any) {
-      showFeedback("error", err.message || "Account deletion failed.");
+    } catch (err) {
+      showFeedback("error", (err as Error).message || "Account deletion failed.");
     } finally {
       setUpdating(null);
     }
@@ -598,7 +599,7 @@ export default function StoreSettingsPage() {
                 </h3>
                 <p className="text-xs text-stone-400 max-w-xl leading-relaxed">
                   {currentSub?.status === "TRIAL"
-                    ? `Your free trial runs until ${new Date(currentSub.trialEndAt).toLocaleDateString()}. Upgrade anytime below.`
+                    ? `Your free trial runs until ${currentSub.trialEndAt ? new Date(currentSub.trialEndAt).toLocaleDateString() : "—"}. Upgrade anytime below.`
                     : `Your subscription is active (${currentSub?.status?.toLowerCase()}).`}
                 </p>
               </div>
@@ -618,7 +619,7 @@ export default function StoreSettingsPage() {
 
           {/* DYNAMIC PLAN CARDS SCALER GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans?.map((plan: any) => {
+            {plans?.map((plan) => {
               const isActivePlan = plan.id === currentSub?.planId;
               return (
                 <Card

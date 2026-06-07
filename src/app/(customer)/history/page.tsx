@@ -13,12 +13,21 @@ export default function HistoryPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Stamps");
   const toast = useToast();
 
-  const { data: cards = [], isLoading, isError } = useQuery<any[]>({
+  interface LoyaltyCard {
+    id: string;
+    businessId: string;
+    currentStamps: number;
+    totalEarned: number | null;
+    rewardRedeemedCount: number;
+    business?: { name: string };
+  }
+
+  const { data: cards = [], isLoading, isError } = useQuery<LoyaltyCard[]>({
     queryKey: ["my-cards"],
-    queryFn: () => api.get<any[]>("/cards"),
+    queryFn: () => api.get<LoyaltyCard[]>("/cards"),
     throwOnError: false,
     meta: {
-      onError: (err: any) => toast.error(err.message || "Failed to load history."),
+      onError: (err: Error) => toast.error(err.message || "Failed to load history."),
     },
   });
 
@@ -63,7 +72,7 @@ export default function HistoryPage() {
 
       {!isLoading && !isError && cards.length > 0 && (
         <div className="space-y-3">
-          {cards.map((card: any) => (
+          {cards.map((card) => (
             <Card key={card.id} className="border-stone-800 bg-[#14100E] rounded-2xl p-4 space-y-1">
               <p className="text-sm font-black text-stone-100">{card.business?.name}</p>
               {tab === "Stamps" ? (

@@ -165,7 +165,7 @@ export default function CounterDisplaysPage() {
                       <p className="text-xs text-stone-500">{staffMe.storeLocation.phone}</p>
                     )}
                     <p className="text-[10px] text-stone-600 mt-2">
-                      Customers scanning this QR should select <span className="text-amber-400 font-bold">"{staffMe.storeLocation.name}"</span> when requesting a stamp.
+                      Customers scanning this QR should select <span className="text-amber-400 font-bold">&quot;{staffMe.storeLocation.name}&quot;</span> when requesting a stamp.
                     </p>
                   </div>
                 ) : (

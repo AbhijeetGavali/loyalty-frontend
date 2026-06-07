@@ -5,10 +5,9 @@ import React, {
   useContext,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { setAuthState, api } from "./api";
+import { setAuthState } from "./api";
 
 // ── 3 states ──────────────────────────────────────────────────────────────────
 export type AppMode = "authed" | "guest";

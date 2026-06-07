@@ -36,25 +36,25 @@ export default function StoreLocationsPage() {
   const createMutation = useMutation({
     mutationFn: (data: object) => api.post("/business/locations", data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["store-locations"] }); setShowForm(false); setForm(emptyForm); toast.success("Location added."); },
-    onError: (err: any) => toast.error(err.message || "Failed to add location."),
+    onError: (err: Error) => toast.error(err.message || "Failed to add location."),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: object }) => api.put(`/business/locations/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["store-locations"] }); setEditId(null); setShowForm(false); toast.success("Location updated."); },
-    onError: (err: any) => toast.error(err.message || "Failed to update location."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update location."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/business/locations/${id}`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["store-locations"] }); toast.success("Location removed."); },
-    onError: (err: any) => toast.error(err.message || "Failed to delete location."),
+    onError: (err: Error) => toast.error(err.message || "Failed to delete location."),
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => api.put(`/business/locations/${id}`, { isActive }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["store-locations"] }),
-    onError: (err: any) => toast.error(err.message || "Failed to update."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update."),
   });
 
   function handleSubmit(e: React.FormEvent) {

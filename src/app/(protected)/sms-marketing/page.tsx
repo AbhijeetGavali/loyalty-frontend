@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  MessageSquare, Send, Clock, CheckCheck, XCircle,
-  Loader2, Users, AlertTriangle, Mail, ChevronDown,
+  MessageSquare, Send, Clock,
+  Loader2, Users, AlertTriangle, Mail,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
@@ -44,7 +44,7 @@ function NotSetupOverlay() {
         Contact us at contact@ideasprout.in
       </a>
       <p className="text-[10px] text-stone-600">
-        We'll configure your Meta WhatsApp Business API credentials within 24 hours.
+        We&apos;ll configure your Meta WhatsApp Business API credentials within 24 hours.
       </p>
     </div>
   );
@@ -104,7 +104,7 @@ export default function SMSMarketingPage() {
       toast.success(`Sent to ${data.sent} customers. ${data.failed > 0 ? `${data.failed} failed (no phone).` : ""}`);
       setMessage("");
     },
-    onError: (err: any) => toast.error(err.message || "Broadcast failed."),
+    onError: (err: Error) => toast.error(err.message || "Broadcast failed."),
   });
 
   const configured = status?.configured ?? false;
@@ -141,7 +141,7 @@ export default function SMSMarketingPage() {
           { key: "broadcast", label: "Broadcast", icon: Send },
           { key: "history",   label: "Message History", icon: Clock },
         ].map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setTab(key as any)}
+          <button key={key} onClick={() => setTab(key as "broadcast" | "history")}
             className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${tab === key ? "bg-[#0C0A09] text-amber-400 border border-stone-900" : "text-stone-500 hover:text-stone-300"}`}>
             <Icon className="size-3" /> {label}
           </button>

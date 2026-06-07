@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/appContext";
 import { useToast } from "@/components/ui/toast";
 
-export default function LoginPage() {
+function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -64,8 +64,8 @@ export default function LoginPage() {
       setToken(response.accessToken);
       toast.success("Welcome back! Redirecting to your dashboard...");
       router.push(redirectTo);
-    } catch (err: any) {
-      const msg = err.message || "Invalid credentials. Please try again.";
+    } catch (err) {
+      const msg = (err as Error).message || "Invalid credentials. Please try again.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -86,7 +86,7 @@ export default function LoginPage() {
         router.push(redirectTo);
       }
     }
-  }, [token]);
+  }, [token, redirectTo, router, setToken]);
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#0C0A09] select-none transition-colors duration-500">
@@ -305,5 +305,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPageWrapper() {
+  return (
+    <Suspense>
+      <LoginPage />
+    </Suspense>
   );
 }

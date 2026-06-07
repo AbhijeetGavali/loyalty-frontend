@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Search, Award, Crown, Loader2 } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
@@ -10,12 +10,18 @@ import { api } from "@/lib/api";
 export default function OurRegularsPage() {
   const [search, setSearch] = useState("");
 
-  const { data: customers = [], isLoading, isError } = useQuery<any[]>({
+  interface Customer {
+    id: string; firstName: string; lastName: string; email: string | null; phone?: string | null;
+    totalStamps: number; activeStamps: number; targetStamps?: number;
+    rewardAvailable: boolean; rewardRedeemedCount: number;
+  }
+
+  const { data: customers = [], isLoading, isError } = useQuery<Customer[]>({
     queryKey: ["business-customers"],
-    queryFn: () => api.get<any[]>("/business/customers"),
+    queryFn: () => api.get<Customer[]>("/business/customers"),
   });
 
-  const filtered = customers.filter((c: any) => {
+  const filtered = customers.filter((c) => {
     const name = `${c.firstName} ${c.lastName}`.toLowerCase();
     return name.includes(search.toLowerCase()) || (c.email || "").toLowerCase().includes(search.toLowerCase());
   });
@@ -57,7 +63,7 @@ export default function OurRegularsPage() {
 
       {!isLoading && !isError && filtered.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((c: any) => {
+          {filtered.map((c) => {
             const tier = getTierLabel(c.totalStamps);
             const progress = Math.min((c.activeStamps / (c.targetStamps || 10)) * 100, 100);
             return (

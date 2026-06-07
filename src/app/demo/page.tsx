@@ -6,14 +6,7 @@ import {
   Building2,
   Users,
   QrCode,
-  Sliders,
   LayoutGrid,
-  BarChart3,
-  Smartphone,
-  PlusSquare,
-  Receipt,
-  Award,
-  ArrowRight,
   ShieldCheck,
   Play,
   Video,
@@ -305,7 +298,7 @@ export default function HowItWorksPage() {
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 font-medium">
               Click the button block below to simulate appending a transactional
-              verification stamp on a customer's browser pass interface with
+              verification stamp on a customer&apos;s browser pass interface with
               live spring animation feedback loops.
             </p>
           </div>
@@ -441,7 +434,7 @@ export default function HowItWorksPage() {
                     </h4>
                     <p className="text-[11px] text-stone-500 leading-normal mt-0.5">
                       Ensures customer requests execute cleanly inside your
-                      restaurant's spatial radius coordinates. Prevents users
+                      restaurant&apos;s spatial radius coordinates. Prevents users
                       from sharing checkout code strings over internet groups to
                       claim points remotely.
                     </p>

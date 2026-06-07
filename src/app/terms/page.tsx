@@ -19,16 +19,21 @@ export default function TermsPage() {
                 </p>
                 <p className="text-slate-600 mb-4">
                   These Terms and Conditions, along with the privacy policy
-                  (“Terms”), constitute a binding agreement by and between{" "}
-                  <strong className="font-semibold">ABHIJEET BALASAHEB GAVALI</strong> (“Website Owner”,
-                  “we”, “us”, or “our”) and you (“you” or “your”) regarding your
-                  use of the QR Code Generator website and its services.
+                  (&quot;Terms&quot;), constitute a binding agreement by and
+                  between{" "}
+                  <strong className="font-semibold">
+                    ABHIJEET BALASAHEB GAVALI
+                  </strong>{" "}
+                  (&quot;Website Owner&quot;, &quot;we&quot;, &quot;us&quot;, or
+                  &quot;our&quot;) and you (&quot;you&quot; or &quot;your&quot;)
+                  regarding your use of the QR Code Generator website and its
+                  services.
                 </p>
                 <h2 className="text-lg font-semibold text-foreground mt-6 mb-3">
                   1. Acceptance of Terms
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  By accessing or using the Regulars Club platform ("Service"),
+                  By accessing or using the Regulars Club platform (&quot;Service&quot;),
                   you agree to be bound by these Terms and Conditions. If you do
                   not agree to these terms, please do not use our Service.
                 </p>
@@ -64,13 +69,13 @@ export default function TermsPage() {
                 </h2>
                 <p className="text-muted-foreground mb-4">
                   You agree not to misuse the Service, attempt to earn stamps
-                  fraudulently, or interfere with the platform's operation.
+                  fraudulently, or interfere with the platform&apos;s operation.
                 </p>
                 <h2 className="text-lg font-semibold text-foreground mt-6 mb-3">
                   6. Limitation of Liability
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  Regulars Club is provided "as is" without warranties. We are
+                  Regulars Club is provided &quot;as is&quot; without warranties. We are
                   not liable for any indirect, incidental, or consequential
                   damages arising from your use of the Service.
                 </p>
@@ -86,8 +91,8 @@ export default function TermsPage() {
                   8. Business Subscription Plans
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  For businesses and partners, Regulars Club offers the "Basic
-                  Plan" at ₹999/year. This includes a 3-day free trial with no
+                  For businesses and partners, Regulars Club offers the &quot;Basic
+                  Plan&quot; at ₹999/year. This includes a 3-day free trial with no
                   payment required to start. Features include unlimited loyalty
                   cards, custom rewards &amp; stamps, QR code generation, and
                   analytics dashboard. Subscription can be cancelled at any

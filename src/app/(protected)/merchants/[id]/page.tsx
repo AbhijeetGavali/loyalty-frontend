@@ -10,28 +10,33 @@ import { useState } from "react";
 
 function WaConfigPanel({ merchantId }: { merchantId: string }) {
   const toast = useToast();
+  interface WaConfig {
+    hasSecret: boolean;
+    updatedAt: string;
+  }
+
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ waPhoneNumberId: "", waToken: "", waSecret: "" });
   const [showToken, setShowToken] = useState(false);
 
-  const { data: waConfig } = useQuery<any>({
+  const { data: waConfig } = useQuery<WaConfig | null>({
     queryKey: ["admin-wa-config", merchantId],
-    queryFn: () => api.get<any>(`/admin/merchants/${merchantId}/wa-config`),
+    queryFn: () => api.get<WaConfig | null>(`/admin/merchants/${merchantId}/wa-config`),
   });
 
   const saveMutation = useMutation({
     mutationFn: (data: object) => api.put(`/admin/merchants/${merchantId}/wa-config`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-wa-config", merchantId] }); toast.success("WA config saved."); setForm({ waPhoneNumberId: "", waToken: "", waSecret: "" }); },
-    onError: (err: any) => toast.error(err.message || "Failed to save."),
+    onError: (err: Error) => toast.error(err.message || "Failed to save."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/admin/merchants/${merchantId}/wa-config`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-wa-config", merchantId] }); toast.success("WA config removed."); },
-    onError: (err: any) => toast.error(err.message || "Failed to remove."),
+    onError: (err: Error) => toast.error(err.message || "Failed to remove."),
   });
 
-  const hasConfig = waConfig && waConfig !== null;
+  const hasConfig = !!waConfig;
 
   return (
     <Card className="border-stone-800 bg-[#14100E] rounded-2xl p-5 space-y-4">
@@ -65,7 +70,7 @@ function WaConfigPanel({ merchantId }: { merchantId: string }) {
           <div key={key} className="space-y-1 relative">
             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{label}</label>
             <div className="relative">
-              <input type={type} value={(form as any)[key]}
+              <input type={type} value={form[key as keyof typeof form]}
                 onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                 className="w-full h-9 px-3 bg-[#0C0A09] border border-stone-800 rounded-xl text-stone-100 text-xs focus:outline-none focus:border-amber-500/50"
                 placeholder={hasConfig ? "Leave blank to keep existing" : ""}
@@ -99,13 +104,35 @@ function WaConfigPanel({ merchantId }: { merchantId: string }) {
   );
 }
 
+interface Payment {
+  id: string;
+  createdAt: string;
+  status: string;
+  amount: number;
+}
+
+interface MerchantDetail {
+  name: string;
+  type?: string;
+  location?: string;
+  owner?: { email?: string; createdAt?: string; isActive?: boolean };
+  _count?: { cards?: number; stampRequests?: number };
+  subscription?: {
+    status: string;
+    subscriptionStartAt?: string;
+    plan?: { name?: string; monthlyPrice?: number };
+    payments?: Payment[];
+  };
+  loyaltyProgram?: Array<{ title: string; stampsRequired: number; rewardTitle?: string; isActive?: boolean }>;
+}
+
 export default function MerchantDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { data: merchant, isLoading, isError } = useQuery<any>({
+  const { data: merchant, isLoading, isError } = useQuery<MerchantDetail>({
     queryKey: ["admin-merchant", id],
-    queryFn: () => api.get<any>(`/admin/merchants/${id}`),
+    queryFn: () => api.get<MerchantDetail>(`/admin/merchants/${id}`),
   });
 
   if (isLoading) return (
@@ -139,7 +166,7 @@ export default function MerchantDetailPage() {
           { icon: Users, label: "Loyalty Cards", value: merchant._count?.cards ?? 0, color: "text-amber-400" },
           { icon: Ticket, label: "Stamp Requests", value: merchant._count?.stampRequests ?? 0, color: "text-blue-400" },
           { icon: CreditCard, label: "Plan", value: sub?.plan?.name ?? "None", color: "text-emerald-400" },
-        ].map(({ icon: Icon, label, value, color }) => (
+        ].map(({ label, value, color }) => (
           <div key={label} className="p-4 bg-[#14100E] border border-stone-800 rounded-2xl">
             <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">{label}</span>
             <span className={`text-lg font-black block mt-1 ${color}`}>{value}</span>
@@ -156,7 +183,7 @@ export default function MerchantDetailPage() {
           </div>
           <div>
             <p className="text-sm font-bold text-stone-100">{merchant.owner?.email}</p>
-            <p className="text-[10px] text-stone-500">Joined {new Date(merchant.owner?.createdAt).toLocaleDateString()}</p>
+            <p className="text-[10px] text-stone-500">Joined {merchant.owner?.createdAt ? new Date(merchant.owner.createdAt).toLocaleDateString() : "—"}</p>
           </div>
           <span className={`ml-auto text-[9px] px-1.5 py-0.5 rounded border font-bold uppercase ${merchant.owner?.isActive ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-rose-400 bg-rose-500/10 border-rose-500/20"}`}>
             {merchant.owner?.isActive ? "Active" : "Suspended"}
@@ -174,11 +201,11 @@ export default function MerchantDetailPage() {
             <div><span className="text-stone-500">Monthly Price</span><p className="font-bold text-stone-100 mt-0.5">₹{sub.plan?.monthlyPrice ?? "—"}</p></div>
             <div><span className="text-stone-500">Started</span><p className="font-bold text-stone-100 mt-0.5">{sub.subscriptionStartAt ? new Date(sub.subscriptionStartAt).toLocaleDateString() : "—"}</p></div>
           </div>
-          {sub.payments?.length > 0 && (
+          {(sub.payments?.length ?? 0) > 0 && (
             <div className="mt-2 pt-3 border-t border-stone-900">
               <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2">Recent Payments</p>
               <div className="space-y-1.5">
-                {sub.payments.slice(0, 5).map((p: any) => (
+                {sub.payments!.slice(0, 5).map((p) => (
                   <div key={p.id} className="flex justify-between text-xs">
                     <span className="text-stone-400">{new Date(p.createdAt).toLocaleDateString()}</span>
                     <span className={`font-bold ${p.status === "SUCCESS" ? "text-emerald-400" : "text-rose-400"}`}>₹{p.amount} · {p.status}</span>

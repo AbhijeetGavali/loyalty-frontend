@@ -7,10 +7,7 @@ import {
   ShieldCheck,
   Zap,
   Sparkles,
-  Building2,
-  Users,
   Flame,
-  Award,
 } from "lucide-react";
 
 export default function AboutPage() {

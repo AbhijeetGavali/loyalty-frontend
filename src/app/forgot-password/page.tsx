@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +34,6 @@ export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
 
-  const router = useRouter();
   const toast = useToast();
 
   // Handle countdown timers for secure token re-dispatch loops
@@ -65,9 +63,9 @@ export default function ForgotPasswordPage() {
       setIsSubmitted(true);
       setResendCountdown(60); // Protect network line headers for 60 seconds
       toast.success("Reset link sent — check your email");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Password recovery failure point:", err);
-      const msg = err.message || "Could not process recovery. Please verify your administrative email address.";
+      const msg = (err as Error).message || "Could not process recovery. Please verify your administrative email address.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -148,7 +146,7 @@ export default function ForgotPasswordPage() {
                   Reset Password
                 </CardTitle>
                 <CardDescription className="text-stone-400 text-xs sm:text-sm leading-relaxed">
-                  Provide your business email link. We'll transmit secure
+                  Provide your business email link. We&apos;ll transmit secure
                   onboarding instructions directly to your node.
                 </CardDescription>
               </CardHeader>

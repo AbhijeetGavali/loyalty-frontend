@@ -52,9 +52,15 @@ interface Subscription {
   plan: Plan;
 }
 
+declare global {
+  interface Window {
+    Razorpay: new (options: object) => { open: () => void };
+  }
+}
+
 function loadRazorpay(): Promise<boolean> {
   return new Promise((resolve) => {
-    if ((window as any).Razorpay) return resolve(true);
+    if (window.Razorpay) return resolve(true);
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => resolve(true);
@@ -84,7 +90,7 @@ export default function SubscriptionPage() {
       queryClient.invalidateQueries({ queryKey: ["billing-current"] });
       toast.success("Subscription activated!");
     },
-    onError: (err: any) => toast.error(err.message || "Payment verification failed."),
+    onError: (err: Error) => toast.error(err.message || "Payment verification failed."),
   });
 
   async function handleSubscribe(plan: Plan) {
@@ -104,7 +110,7 @@ export default function SubscriptionPage() {
         name: "RegularsClub",
         description: `${plan.name} – Monthly`,
         order_id: order.orderId,
-        handler: (response: any) => {
+        handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
           verifyMutation.mutate({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -115,10 +121,10 @@ export default function SubscriptionPage() {
         theme: { color: "#F59E0B" },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to initiate payment.");
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to initiate payment.");
     } finally {
       setPaying(null);
     }

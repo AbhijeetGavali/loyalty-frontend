@@ -51,8 +51,8 @@ export default function ScanOnboardingPage() {
         setStatus("You're in! Opening your card...");
         toast.success("Loyalty card created!");
         setTimeout(() => router.replace(`/wallet/card/${businessId}`), 800);
-      } catch (err: any) {
-        const msg = err.message || "Failed to join loyalty program";
+      } catch (err) {
+        const msg = (err as Error).message || "Failed to join loyalty program";
         if (
           msg.toLowerCase().includes("already") ||
           msg.toLowerCase().includes("unique")
