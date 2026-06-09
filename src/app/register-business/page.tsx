@@ -55,6 +55,7 @@ function RegisterBusinessPage() {
 
   const plan = searchParams?.get("plan") || "BASIC";
   const redirectTo = searchParams?.get("redirect") || "/dashboard";
+  const affiliateCode = searchParams?.get("ref") || (typeof window !== "undefined" ? localStorage.getItem("affiliateCode") : null);
 
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
@@ -112,6 +113,7 @@ function RegisterBusinessPage() {
         password,
         targetStamps: Number(stampRequirement),
         starterPlanCode: plan,
+        ...(affiliateCode ? { affiliateCode } : {}),
       });
       if (typeof window !== "undefined") {
         localStorage.setItem("token", response.accessToken);
@@ -129,6 +131,14 @@ function RegisterBusinessPage() {
       setLoading(false);
     }
   };
+
+  // Persist affiliate referral code from URL to localStorage
+  useEffect(() => {
+    const refParam = searchParams?.get("ref");
+    if (refParam && typeof window !== "undefined") {
+      localStorage.setItem("affiliateCode", refParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (token) router.push(redirectTo);

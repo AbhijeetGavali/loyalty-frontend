@@ -108,6 +108,29 @@ export default function PrivacyPage() {
                   </a>
                 </p>
               </div>
+
+              {/* Affiliate-specific privacy notice */}
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-6 mt-6">
+                <h2 className="text-lg font-semibold text-stone-900 mb-2">Affiliate Program — Data We Collect</h2>
+                <p className="text-sm text-stone-600 mb-2">
+                  When you apply for or participate in our Affiliate Program, we collect:
+                </p>
+                <ul className="text-sm text-stone-600 list-disc pl-5 space-y-1 mb-3">
+                  <li>Name, email address, and website/social handle provided in your application</li>
+                  <li>Referral activity: which businesses registered using your code and their subscription status</li>
+                  <li>Payout details: UPI ID or bank account information for commission disbursement</li>
+                  <li>KYC documents (government ID, PAN) for payouts above ₹10,000 as required by Indian law</li>
+                </ul>
+                <p className="text-sm text-stone-600 mb-3">
+                  This data is used solely to operate the affiliate program, calculate and pay commissions, and comply with tax regulations. It is never sold to third parties.
+                </p>
+                <a
+                  href="/affiliate-program/terms"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline"
+                >
+                  Read the full Affiliate Program Terms & Policy →
+                </a>
+              </div>
             </div>
           </div>
         </div>

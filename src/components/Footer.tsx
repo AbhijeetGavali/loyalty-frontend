@@ -18,6 +18,7 @@ export const Footer = () => {
       title: "For Vendors",
       links: [
         { href: "/login", label: "Merchant Portal" },
+        { href: "/affiliate-program", label: "Affiliate Program" },
         { href: "/contact", label: "Contact Sales" },
         { href: "/demo#security", label: "Anti-Fraud System" },
         { href: "/demo", label: "Request Walkthrough" },

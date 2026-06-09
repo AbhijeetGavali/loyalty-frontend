@@ -62,7 +62,13 @@ function LoginPage() {
       localStorage.setItem("token", response.accessToken);
       localStorage.setItem("refreshToken", response.refreshToken);
       setToken(response.accessToken);
-      toast.success("Welcome back! Redirecting to your dashboard...");
+      toast.success("Welcome back!");
+      // Role-based redirect
+      try {
+        const payload = JSON.parse(atob(response.accessToken.split(".")[1]));
+        if (payload.role === "SUPER_ADMIN") { router.push("/dashboard"); return; }
+        if (payload.role === "AFFILIATE") { router.push("/affiliate"); return; }
+      } catch {}
       router.push(redirectTo);
     } catch (err) {
       const msg = (err as Error).message || "Invalid credentials. Please try again.";

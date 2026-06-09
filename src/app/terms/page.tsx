@@ -121,6 +121,20 @@ export default function TermsPage() {
                   </a>
                 </p>
               </div>
+
+              {/* Affiliate Program Terms */}
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-6 mt-6">
+                <h2 className="text-lg font-semibold text-stone-900 mb-2">Affiliate Program</h2>
+                <p className="text-sm text-stone-600 mb-3">
+                  Participation in the RegularsClub Affiliate Program is governed by a separate, dedicated agreement that covers eligibility, commission structure, payout policy, prohibited conduct, and termination.
+                </p>
+                <a
+                  href="/affiliate-program/terms"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline"
+                >
+                  Read the full Affiliate Program Terms & Policy →
+                </a>
+              </div>
             </div>
           </div>
         </div>

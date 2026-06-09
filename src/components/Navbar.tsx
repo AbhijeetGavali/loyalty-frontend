@@ -19,6 +19,16 @@ export const Navbar = () => {
 
         {/* Action Controls Panel */}
         <div className="flex items-center gap-2">
+          {/* Affiliate quick-links */}
+          <Link href="/affiliate-program" className="hidden sm:block">
+            <Button
+              variant="ghost"
+              className="font-bold text-xs text-stone-400 hover:text-amber-400 hover:bg-stone-900/40 rounded-xl px-3 transition-all"
+            >
+              Earn with Us
+            </Button>
+          </Link>
+
           {/* Merchant Portal Quick-link */}
           <Link href="/customer-login">
             <Button

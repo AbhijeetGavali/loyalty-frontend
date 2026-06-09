@@ -65,6 +65,12 @@ const MERCHANT_NAV = {
       icon: "📈",
       tier: "free",
     },
+    {
+      to: "/affiliate",
+      label: "Affiliate Program",
+      icon: "🤝",
+      tier: "free",
+    },
   ],
   system: [
     { to: "/subscription", label: "Subscription", icon: "💳", tier: "free" },
@@ -89,6 +95,7 @@ const STAFF_NAV = {
 };
 
 const SUPERADMIN_NAV = [
+  { to: "/dashboard", label: "Platform Overview", icon: "📊", tier: "free" },
   { to: "/merchants", label: "Active Brands", icon: "🏪", tier: "free" },
   {
     to: "/billing-plans",
@@ -96,6 +103,7 @@ const SUPERADMIN_NAV = [
     icon: "💰",
     tier: "free",
   },
+  { to: "/merchants/affiliates", label: "Affiliates", icon: "🤝", tier: "free" },
   { to: "/settings", label: "HQ Settings", icon: "⚙️", tier: "free" },
 ];
 
@@ -144,15 +152,16 @@ export default function AppShell({
 
     // Fallback anchor matrices for role mismatches
     const defaultsByRole: Record<string, string> = {
-      superadmin: "/merchants",
-      customer: "/wallet",
-      merchant: "/dashboard",
-      staff: "/dashboard",
+      SUPER_ADMIN: "/dashboard",
+      CUSTOMER: "/wallet",
+      BUSINESS_OWNER: "/dashboard",
+      BUSINESS_STAFF: "/dashboard",
+      AFFILIATE: "/affiliate",
     };
 
     let isAllowed = false;
 
-    if (role === "SUPERADMIN") {
+    if (role === "SUPER_ADMIN") {
       isAllowed = true;
     } else if (role === "CUSTOMER") {
       isAllowed =
@@ -231,7 +240,7 @@ export default function AppShell({
               Regulars Club
             </div>
             <div className="text-[11px] text-stone-400 font-mono font-bold uppercase tracking-wider">
-              {role === "SUPERADMIN" && "HQ Global Admin"}
+              {role === "SUPER_ADMIN" && "HQ Global Admin"}
               {role === "CUSTOMER" && "Member Wallet"}
               {(role === "BUSINESS_OWNER" || role === "BUSINESS_STAFF") && "Merchant Studio"}
               {role === "BUSINESS_STAFF" && " · Staff"}
@@ -262,7 +271,7 @@ export default function AppShell({
         </div>
 
         {/* CONDITIONALLY RENDER NAVIGATION GROUPS BY CURRENT CONTEXT IDENTITY */}
-        {role === "SUPERADMIN" && (
+        {role === "SUPER_ADMIN" && (
           <NavSection
             title="HQ Central Analytics"
             items={SUPERADMIN_NAV}

@@ -1,7 +1,9 @@
 "use client";
-
+"use client";
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApp } from "@/lib/appContext";
+import AdminDashboard from "./AdminDashboard";
 import {
   Users,
   Ticket,
@@ -112,6 +114,9 @@ function StampLedgerFeed() {
 }
 
 export default function DashboardOverview() {
+  const { role } = useApp();
+  if (role === "SUPER_ADMIN") return <AdminDashboard />;
+
   const queryClient = useQueryClient();
   const toast = useToast();
 

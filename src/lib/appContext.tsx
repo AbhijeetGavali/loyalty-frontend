@@ -16,7 +16,7 @@ interface AppCtx {
   mode: AppMode;
   // Auth fields (only meaningful when mode === 'authed')
   token: string | null;
-  role: "BUSINESS_OWNER" | "CUSTOMER" | "SUPERADMIN" | "BUSINESS_STAFF" | null;
+  role: "BUSINESS_OWNER" | "CUSTOMER" | "SUPER_ADMIN" | "BUSINESS_STAFF" | "AFFILIATE" | null;
   userId: string | null;
   email: string;
   setupStatus: {
@@ -30,8 +30,9 @@ interface AppCtx {
     role?:
       | "BUSINESS_OWNER"
       | "CUSTOMER"
-      | "SUPERADMIN"
+      | "SUPER_ADMIN"
       | "BUSINESS_STAFF"
+      | "AFFILIATE"
       | null,
     userId?: string,
     email?: string,
