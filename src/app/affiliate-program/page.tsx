@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -327,6 +328,18 @@ export default function AffiliateLandingPage() {
             Affiliate Policy
           </Link>
         </p>
+
+        <a
+          href="https://affiliate.watch/affiliate/regularsclub-by-ideasprout-technologies"
+          target="_blank"
+          style={{ display: "inline-block", lineHeight: 0 }}
+        >
+          <Image
+            src="https://affiliate.watch/api/affiliate-badge/2786/top-dark-bg-white-text"
+            alt="Featured as a Top Affiliate Program on Affiliate.Watch"
+            style={{ height: "80px" }}
+          />
+        </a>
       </footer>
     </main>
   );
