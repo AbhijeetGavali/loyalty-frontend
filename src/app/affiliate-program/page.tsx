@@ -197,6 +197,23 @@ export default function AffiliateLandingPage() {
         </div>
       </section>
 
+      <section className="relative max-w-sm mx-auto h-20 overflow-hidden mt-6">
+        <a
+          href="https://affiliate.watch/affiliate/regularsclub-by-ideasprout-technologies"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full h-full"
+        >
+          <Image
+            src="https://affiliate.watch/api/affiliate-badge/2786/top-dark-bg-white-text"
+            alt="Featured as a Top Affiliate Program on Affiliate.Watch"
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        </a>
+      </section>
+
       {/* Apply form */}
       <section id="apply" className="max-w-lg mx-auto px-6 py-16">
         <p className="text-xs font-black text-stone-500 uppercase tracking-widest text-center mb-2">
@@ -328,18 +345,6 @@ export default function AffiliateLandingPage() {
             Affiliate Policy
           </Link>
         </p>
-
-        <a
-          href="https://affiliate.watch/affiliate/regularsclub-by-ideasprout-technologies"
-          target="_blank"
-          style={{ display: "inline-block", lineHeight: 0 }}
-        >
-          <Image
-            src="https://affiliate.watch/api/affiliate-badge/2786/top-dark-bg-white-text"
-            alt="Featured as a Top Affiliate Program on Affiliate.Watch"
-            style={{ height: "80px" }}
-          />
-        </a>
       </footer>
     </main>
   );
