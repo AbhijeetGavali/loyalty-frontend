@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
@@ -21,9 +21,11 @@ export default function ScanOnboardingPage() {
   const router = useRouter();
   const [status, setStatus] = useState("Identifying café...");
   const [error, setError] = useState("");
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (!businessId) return;
+    if (!businessId || ran.current) return;
+    ran.current = true;
 
     // Read auth directly from localStorage — avoids the context hydration race
     const stored =
@@ -67,7 +69,7 @@ export default function ScanOnboardingPage() {
     };
 
     onboard();
-  }, [businessId, router, toast]);
+  }, [businessId, router]);
 
   return (
     <div className="min-h-screen bg-[#0C0A09] flex flex-col items-center justify-center gap-4 px-4">
