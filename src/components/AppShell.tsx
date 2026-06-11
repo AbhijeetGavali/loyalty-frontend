@@ -97,6 +97,11 @@ const STAFF_NAV = {
   ],
 };
 
+const AFFILIATE_NAV = [
+  { to: "/affiliate", label: "Dashboard", icon: "🤝", tier: "free" },
+  { to: "/settings", label: "Settings", icon: "⚙️", tier: "free" },
+];
+
 const SUPERADMIN_NAV = [
   { to: "/dashboard", label: "Platform Overview", icon: "📊", tier: "free" },
   { to: "/merchants", label: "Active Brands", icon: "🏪", tier: "free" },
@@ -171,6 +176,8 @@ export default function AppShell({
         CUSTOMER_NAV.some((item) => item.to === cleanPath) ||
         cleanPath === "/wallet" ||
         cleanPath.startsWith("/wallet/card/");
+    } else if (role === "AFFILIATE") {
+      isAllowed = AFFILIATE_NAV.some((item) => item.to === cleanPath);
     } else {
       // Default Fallback mapping validation loop for Merchant / Staff Roles
       const allowedNav = role === "BUSINESS_STAFF" ? STAFF_NAV : MERCHANT_NAV;
@@ -247,6 +254,7 @@ export default function AppShell({
               {role === "CUSTOMER" && "Member Wallet"}
               {(role === "BUSINESS_OWNER" || role === "BUSINESS_STAFF") && "Merchant Studio"}
               {role === "BUSINESS_STAFF" && " · Staff"}
+              {role === "AFFILIATE" && "Affiliate Portal"}
             </div>
           </div>
         </div>
@@ -352,6 +360,17 @@ export default function AppShell({
               onNavClick={handleItemNavigation}
             />
           </>
+        )}
+
+        {role === "AFFILIATE" && (
+          <NavSection
+            title="Affiliate"
+            items={AFFILIATE_NAV}
+            pathname={pathname}
+            statusDots={{}}
+            prefix={prefix}
+            onNavClick={handleItemNavigation}
+          />
         )}
       </nav>
 
