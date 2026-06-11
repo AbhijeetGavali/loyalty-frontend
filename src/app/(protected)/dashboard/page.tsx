@@ -33,6 +33,7 @@ interface LedgerRequest {
   detail: string; // e.g., "Espresso" or "Free Latte Reward"
   count?: number; // relevant for stamps
   date: string;
+  totalStamps?: number;
 }
 
 function timeAgo(date: string) {
@@ -141,6 +142,7 @@ export default function DashboardOverview() {
     createdAt: string;
     customer?: { firstName?: string; lastName?: string; user?: { email?: string } };
     invoice?: { invoiceNumber?: string };
+    loyaltyCard?: { totalEarned?: number; currentStamps?: number };
   }
 
   interface PendingReward {
@@ -157,6 +159,7 @@ export default function DashboardOverview() {
   } = useQuery<PendingStamp[]>({
     queryKey: ["pendingStamps"],
     queryFn: () => api.get<PendingStamp[]>("/stamp/pending"),
+    refetchInterval: 8000,
   });
 
   // 3. Fetch Pending Reward Redemptions
@@ -166,6 +169,7 @@ export default function DashboardOverview() {
   } = useQuery<PendingReward[]>({
     queryKey: ["pendingRewards"],
     queryFn: () => api.get<PendingReward[]>("/reward/pending"),
+    refetchInterval: 8000,
   });
 
   // Merge both into a unified queue
@@ -178,6 +182,7 @@ export default function DashboardOverview() {
       detail: r.invoice?.invoiceNumber ?? "Invoice",
       count: 1,
       date: new Date(r.createdAt).toLocaleTimeString(),
+      totalStamps: r.loyaltyCard?.totalEarned,
     })),
     ...(pendingRewards ?? []).map((r) => ({
       id: r.id,
@@ -405,6 +410,11 @@ export default function DashboardOverview() {
                     <p className="text-[9px] text-stone-600 font-mono tracking-tight">
                       {request.email}
                     </p>
+                    {request.type === "stamp" && request.totalStamps !== undefined && (
+                      <p className="text-[9px] text-stone-500 font-mono">
+                        {request.totalStamps} lifetime stamps
+                      </p>
+                    )}
                   </div>
 
                   {/* Operations Actions & Conditionals */}

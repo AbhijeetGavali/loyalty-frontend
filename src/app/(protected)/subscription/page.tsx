@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreditCard, CheckCircle2, Loader2, Zap, Check, MapPin, Users, Star } from "lucide-react";
+import { CreditCard, CheckCircle2, Loader2, Zap, Check, MapPin, Users, Star, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
@@ -79,6 +79,11 @@ export default function SubscriptionPage() {
     queryFn: () => api.get<Subscription>("/billing/current").catch(() => null),
   });
 
+  const { data: expiryStatus } = useQuery<{ status: string; daysLeft: number } | null>({
+    queryKey: ["billing-expiry-status"],
+    queryFn: () => api.get<{ status: string; daysLeft: number }>("/billing/expiry-status").catch(() => null),
+  });
+
   const { data: plans = [], isLoading: loadingPlans } = useQuery<Plan[]>({
     queryKey: ["billing-plans"],
     queryFn: () => api.get<Plan[]>("/billing/plans"),
@@ -141,6 +146,21 @@ export default function SubscriptionPage() {
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-stone-50">Subscription</h1>
         <p className="text-xs text-stone-500 font-medium mt-0.5">Manage your plan and billing.</p>
       </div>
+
+      {/* Expiry warning banner */}
+      {expiryStatus && expiryStatus.status !== "ok" && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+          <AlertTriangle className="size-4 text-amber-400 shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-amber-300">
+              {expiryStatus.status === "grace"
+                ? `Subscription expired — ${7 + expiryStatus.daysLeft} day${7 + expiryStatus.daysLeft !== 1 ? "s" : ""} of grace period remaining`
+                : `Subscription expires in ${expiryStatus.daysLeft} day${expiryStatus.daysLeft !== 1 ? "s" : ""}`}
+            </p>
+            <p className="text-[10px] text-stone-500 mt-0.5">Renew now to avoid service interruption.</p>
+          </div>
+        </div>
+      )}
 
       {/* Current plan status */}
       {!loadingCurrent && current && (

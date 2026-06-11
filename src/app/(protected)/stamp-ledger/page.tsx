@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 export default function StampLedgerPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"stamps" | "rewards">("stamps");
+  const [locationId, setLocationId] = useState<string>("");
 
   interface StampRecord {
     id: string;
@@ -26,9 +27,14 @@ export default function StampLedgerPage() {
     loyaltyCard?: { customer?: { firstName?: string; lastName?: string } };
   }
 
+  const { data: locations = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["locations"],
+    queryFn: () => api.get("/business/locations"),
+  });
+
   const { data: stampHistory = [], isLoading: isLoadingStamps } = useQuery<StampRecord[]>({
-    queryKey: ["stamp-history"],
-    queryFn: () => api.get<StampRecord[]>("/stamp/history"),
+    queryKey: ["stamp-history", locationId],
+    queryFn: () => api.get<StampRecord[]>(`/stamp/history${locationId ? `?locationId=${locationId}` : ""}`),
   });
 
   const { data: rewardHistory = [], isLoading: isLoadingRewards } = useQuery<RewardRecord[]>({
@@ -89,6 +95,21 @@ export default function StampLedgerPage() {
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
             className="pl-9 bg-[#14100E] border-stone-800 text-stone-100 text-xs rounded-xl h-10" />
         </div>
+        {locations.length > 1 && tab === "stamps" && (
+          <div className="relative flex items-center">
+            <MapPin className="absolute left-2.5 size-3.5 text-stone-600 pointer-events-none" />
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="h-10 pl-8 pr-3 bg-[#14100E] border border-stone-800 text-stone-300 text-xs rounded-xl outline-none focus:border-amber-500/50"
+            >
+              <option value="">All branches</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {isLoading ? (

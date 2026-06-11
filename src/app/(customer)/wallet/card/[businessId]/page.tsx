@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Coffee, Gift, Star, Plus, FileText, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, Coffee, Gift, Star, Plus, FileText, Loader2, MapPin, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -105,6 +105,15 @@ export default function CardDetailPage() {
     queryFn: () => api.get<StoreLocation[]>(`/cards/by-business/${businessId}/locations`),
     enabled: !!businessId,
   });
+
+  // Poll for pending stamp requests for this business
+  const { data: pendingStamps = [] } = useQuery<{ id: string; businessId: string; createdAt: string }[]>({
+    queryKey: ["my-pending-stamps"],
+    queryFn: () => api.get("/stamp/my-pending"),
+    refetchInterval: 10000,
+    enabled: !!businessId,
+  });
+  const pendingForThis = pendingStamps.filter((r) => r.businessId === businessId);
 
   const stampMutation = useMutation({
     mutationFn: (invoiceNumber: string) =>
@@ -266,8 +275,23 @@ export default function CardDetailPage() {
           </div>
         )}
 
+        {/* Pending stamp requests */}
+        {pendingForThis.length > 0 && (
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+            <Clock className="size-4 text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+            <div>
+              <p className="text-xs font-bold text-amber-300">
+                {pendingForThis.length === 1 ? "Stamp request pending" : `${pendingForThis.length} stamp requests pending`}
+              </p>
+              <p className="text-[10px] text-stone-500 mt-0.5">
+                Waiting for staff approval. This usually takes a few minutes.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Request Stamp */}
-        {!card.rewardAvailable && (
+        {!card.rewardAvailable && pendingForThis.length === 0 && (
           <div className="space-y-2">
             {!invoiceOpen ? (
               <Button

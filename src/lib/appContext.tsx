@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { setAuthState } from "./api";
+import { setAuthState, api } from "./api";
 
 // ── 3 states ──────────────────────────────────────────────────────────────────
 export type AppMode = "authed" | "guest";
@@ -37,6 +37,7 @@ interface AppCtx {
     userId?: string,
     email?: string,
   ) => void;
+  setSetupStatus: (s: AppCtx["setupStatus"]) => void;
   hasPosLinked: boolean;
   isFraudGuardActive: boolean;
 }
@@ -49,6 +50,7 @@ const Ctx = createContext<AppCtx>({
   email: "User",
   setupStatus: null,
   setToken: () => {},
+  setSetupStatus: () => {},
   hasPosLinked: false,
   isFraudGuardActive: false,
 });
@@ -96,6 +98,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAuthState(!!token);
   }, [token]);
 
+  // ── Hydrate setupStatus when token changes (for BUSINESS_OWNER / STAFF) ────
+  useEffect(() => {
+    if (!token) return;
+    const parsedRole = parseJwt(token)?.role;
+    if (parsedRole !== "BUSINESS_OWNER" && parsedRole !== "BUSINESS_STAFF") return;
+    api
+      .get<{ hasWa: boolean; hasRzp: boolean; isFraudGuardActive: boolean; hasPosLinked: boolean }>(
+        "/business/setup-status",
+      )
+      .then((data) => setSetupStatus(data))
+      .catch(() => {}); // non-fatal
+  }, [token]);
+
   // ── setToken (login / logout) ───────────────────────────────────────────────
   const setToken = useCallback(
     (
@@ -135,6 +150,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         email,
         setupStatus,
         setToken,
+        setSetupStatus,
         hasPosLinked: setupStatus?.hasPosLinked ?? false,
         isFraudGuardActive: setupStatus?.isFraudGuardActive ?? false,
       }}

@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3, TrendingUp, Users, Coffee,
   Gift, ArrowUpRight, ArrowDownRight, Minus, Repeat2,
   ShieldCheck, UserPlus, Activity, DollarSign, Loader2,
-  BarChart2,
+  BarChart2, MapPin,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
@@ -115,10 +115,17 @@ function RateRing({ value, label, color }: { value: number; label: string; color
 export default function RoiAnalyticsPage() {
   const { role } = useApp();
   const isOwner = role === "BUSINESS_OWNER";
+  const [locationId, setLocationId] = useState<string>("");
+
+  const { data: locations = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["locations"],
+    queryFn: () => api.get("/business/locations"),
+    enabled: isOwner,
+  });
 
   const { data: roi, isLoading, isError } = useQuery<RoiData>({
-    queryKey: ["roi"],
-    queryFn: () => api.get<RoiData>("/business/roi"),
+    queryKey: ["roi", locationId],
+    queryFn: () => api.get<RoiData>(`/business/roi${locationId ? `?locationId=${locationId}` : ""}`),
     refetchInterval: 60000,
   });
 
@@ -195,6 +202,21 @@ export default function RoiAnalyticsPage() {
         {!isOwner && (
           <div className="self-start flex items-center gap-1.5 text-[10px] font-bold text-stone-500 bg-stone-900 border border-stone-800 px-3 py-1.5 rounded-xl">
             <Activity className="size-3" /> Operational view · Revenue hidden
+          </div>
+        )}
+        {isOwner && locations.length > 1 && (
+          <div className="relative flex items-center self-start">
+            <MapPin className="absolute left-2.5 size-3.5 text-stone-600 pointer-events-none" />
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="h-9 pl-8 pr-3 bg-[#14100E] border border-stone-800 text-stone-300 text-xs rounded-xl outline-none focus:border-amber-500/50"
+            >
+              <option value="">All branches</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
           </div>
         )}
       </div>

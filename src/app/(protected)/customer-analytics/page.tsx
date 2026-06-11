@@ -13,6 +13,7 @@ import {
   ArrowUp,
   ArrowDown,
   Loader2,
+  MapPin,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -116,10 +117,16 @@ export default function CustomerAnalyticsPage() {
   const [personaFilter, setPersonaFilter] = useState<Persona | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("totalStamps");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [locationId, setLocationId] = useState<string>("");
+
+  const { data: locations = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["locations"],
+    queryFn: () => api.get("/business/locations"),
+  });
 
   const { data, isLoading, isError } = useQuery<AnalyticsData>({
-    queryKey: ["customer-analytics"],
-    queryFn: () => api.get<AnalyticsData>("/business/analytics/customers"),
+    queryKey: ["customer-analytics", locationId],
+    queryFn: () => api.get<AnalyticsData>(`/business/analytics/customers${locationId ? `?locationId=${locationId}` : ""}`),
   });
 
   const handleSort = (key: SortKey) => {
@@ -285,14 +292,31 @@ export default function CustomerAnalyticsPage() {
           {/* Search + table */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-              <div className="relative max-w-xs w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-600" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search customers…"
-                  className="pl-9 bg-[#14100E] border-stone-800 text-stone-100 text-xs rounded-xl h-10"
-                />
+              <div className="flex gap-2 flex-wrap">
+                <div className="relative max-w-xs w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-600" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search customers…"
+                    className="pl-9 bg-[#14100E] border-stone-800 text-stone-100 text-xs rounded-xl h-10"
+                  />
+                </div>
+                {locations.length > 1 && (
+                  <div className="relative flex items-center">
+                    <MapPin className="absolute left-2.5 size-3.5 text-stone-600 pointer-events-none" />
+                    <select
+                      value={locationId}
+                      onChange={(e) => setLocationId(e.target.value)}
+                      className="h-10 pl-8 pr-3 bg-[#14100E] border border-stone-800 text-stone-300 text-xs rounded-xl outline-none focus:border-amber-500/50"
+                    >
+                      <option value="">All branches</option>
+                      {locations.map((l) => (
+                        <option key={l.id} value={l.id}>{l.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
               <p className="text-[10px] text-stone-600 whitespace-nowrap">
                 {filtered.length} customer{filtered.length !== 1 ? "s" : ""}

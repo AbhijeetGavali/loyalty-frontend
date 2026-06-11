@@ -55,7 +55,7 @@ const MERCHANT_NAV = {
     // },
     {
       to: "/sms-marketing",
-      label: "SMS Marketing",
+      label: "WhatsApp Marketing",
       icon: "💬",
       tier: "free",
     },
@@ -91,6 +91,9 @@ const STAFF_NAV = {
     { to: "/stamp-ledger", label: "Stamp Ledger", icon: "🧾", tier: "free" },
     { to: "/invoices", label: "Invoices", icon: "🧾", tier: "free" },
     { to: "/anti-fraud-studio", label: "Anti-Fraud Studio", icon: "🛡️", tier: "free" },
+  ],
+  system: [
+    { to: "/settings", label: "Settings", icon: "⚙️", tier: "free" },
   ],
 };
 
@@ -202,8 +205,8 @@ export default function AppShell({
 
   const statusDots: Record<string, React.ReactNode> = setupStatus
     ? {
-        "/pos-sync": renderDot(setupStatus.hasPosLinked),
-        "/security": renderDot(setupStatus.isFraudGuardActive),
+        "/sms-marketing": renderDot(setupStatus.hasWa),
+        "/anti-fraud-studio": renderDot(setupStatus.isFraudGuardActive),
       }
     : {};
 

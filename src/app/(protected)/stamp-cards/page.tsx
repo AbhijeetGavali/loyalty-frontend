@@ -14,6 +14,7 @@ interface LoyaltyProgram {
   rewardTitle: string;
   rewardDescription?: string;
   isActive: boolean;
+  stampExpiryDays?: number;
 }
 
 export default function StampCardsPage() {
@@ -21,7 +22,7 @@ export default function StampCardsPage() {
   const [filter, setFilter] = useState<"all" | "active" | "paused">("all");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "" });
+  const [form, setForm] = useState({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "", stampExpiryDays: 0 });
 
   const { data: programs = [], isLoading } = useQuery<LoyaltyProgram[]>({
     queryKey: ["loyalty-programs"],
@@ -51,7 +52,7 @@ export default function StampCardsPage() {
 
   const startEdit = (p: LoyaltyProgram) => {
     setEditingId(p.id);
-    setForm({ title: p.title, stampsRequired: p.stampsRequired, rewardTitle: p.rewardTitle, rewardDescription: p.rewardDescription || "" });
+    setForm({ title: p.title, stampsRequired: p.stampsRequired, rewardTitle: p.rewardTitle, rewardDescription: p.rewardDescription || "", stampExpiryDays: p.stampExpiryDays ?? 0 });
     setShowForm(true);
   };
 
@@ -68,7 +69,7 @@ export default function StampCardsPage() {
           <p className="text-xs text-stone-500 font-medium mt-0.5">Configure loyalty programs for your customers.</p>
         </div>
         <Button
-          onClick={() => { setShowForm(true); setEditingId(null); setForm({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "" }); }}
+          onClick={() => { setShowForm(true); setEditingId(null); setForm({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "", stampExpiryDays: 0 }); }}
           className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs rounded-xl flex items-center gap-2 h-10 px-4 self-start sm:self-center"
         >
           <Plus className="size-3.5" /> New Program
@@ -87,12 +88,13 @@ export default function StampCardsPage() {
               { key: "stampsRequired", label: "Stamps Required", type: "number" },
               { key: "rewardTitle", label: "Reward Title", type: "text" },
               { key: "rewardDescription", label: "Reward Description", type: "text", optional: true },
+              { key: "stampExpiryDays", label: "Stamp expiry (days, 0 = never)", type: "number", optional: true },
             ].map(({ key, label, type, optional }) => (
               <div key={key} className="space-y-1">
                 <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">{label}</label>
                 <input
                   type={type}
-                  min={type === "number" ? 1 : undefined}
+                  min={type === "number" ? (key === "stampExpiryDays" ? 0 : 1) : undefined}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: type === "number" ? Number(e.target.value) : e.target.value }))}
                   required={!optional}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import OwnerOnlyGuard from "@/components/OwnerOnlyGuard";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,8 @@ import {
   Check,
   CreditCard,
   Sliders,
+  MessageSquare,
+  Ticket,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApp as useAuth } from "@/lib/appContext";
@@ -51,8 +52,14 @@ export default function StoreSettingsPage() {
   const router = useRouter();
   const { setToken, role } = useAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<"profile" | "billing">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "billing" | "whatsapp" | "loyalty">("profile");
   useEffect(() => { if (role === 'BUSINESS_STAFF') setActiveTab('profile'); }, [role]);
+
+  // WA config states
+  const [waPhoneNumberId, setWaPhoneNumberId] = useState("");
+  const [waToken, setWaToken] = useState("");
+  const [waSecret, setWaSecret] = useState("");
+  const [waConfigured, setWaConfigured] = useState(false);
 
   // Component Local Status Systems
   const [updating, setUpdating] = useState<string | null>(null);
@@ -76,6 +83,10 @@ export default function StoreSettingsPage() {
   // Account Purge States
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   const [deleteAuthPassword, setDeleteAuthPassword] = useState("");
+
+  // Loyalty Program States
+  const [loyaltyForm, setLoyaltyForm] = useState({ title: "", stampsRequired: 10, rewardTitle: "", rewardDescription: "", stampExpiryDays: 0 });
+  const [loyaltyProgramId, setLoyaltyProgramId] = useState<string | null>(null);
 
   // ==========================================
   // QUERY STRATEGIES (TANSTACK QUERY)
@@ -110,6 +121,33 @@ export default function StoreSettingsPage() {
   const { data: plans, isLoading: isPlansLoading } = useQuery({
     queryKey: ["subscription-plans"],
     queryFn: () => api.get<BillingPlan[]>("/billing/plans"),
+  });
+
+  // Fetch WA status
+  useQuery({
+    queryKey: ["wa-status"],
+    queryFn: async () => {
+      const data = await api.get<{ configured: boolean }>("/business/wa-status");
+      setWaConfigured(data?.configured ?? false);
+      return data;
+    },
+    enabled: role === 'BUSINESS_OWNER',
+  });
+
+  // Fetch loyalty program
+  useQuery({
+    queryKey: ["loyalty-programs"],
+    queryFn: async () => {
+      interface LoyaltyProgram { id: string; title: string; stampsRequired: number; rewardTitle: string; rewardDescription?: string; stampExpiryDays?: number }
+      const programs = await api.get<LoyaltyProgram[]>("/loyalty-program");
+      const p = programs?.[0];
+      if (p) {
+        setLoyaltyProgramId(p.id);
+        setLoyaltyForm({ title: p.title, stampsRequired: p.stampsRequired, rewardTitle: p.rewardTitle, rewardDescription: p.rewardDescription ?? "", stampExpiryDays: p.stampExpiryDays ?? 0 });
+      }
+      return programs;
+    },
+    enabled: role === 'BUSINESS_OWNER',
   });
 
   // Process Subscription Tier Requests
@@ -179,6 +217,39 @@ export default function StoreSettingsPage() {
     }
   };
 
+  const handleLoyaltyProgram = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdating("loyalty");
+    setMessage(null);
+    try {
+      if (loyaltyProgramId) {
+        await api.put(`/loyalty-program/${loyaltyProgramId}`, loyaltyForm);
+      } else {
+        await api.post("/loyalty-program", loyaltyForm);
+      }
+      showFeedback("success", "Loyalty program settings saved.");
+    } catch (err) {
+      showFeedback("error", (err as Error).message || "Failed to save loyalty program.");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleWaConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdating("waconfig");
+    setMessage(null);
+    try {
+      await api.put("/business/wa-config", { waPhoneNumberId, waToken, ...(waSecret ? { waSecret } : {}) });
+      setWaConfigured(true);
+      showFeedback("success", "WhatsApp configuration saved.");
+    } catch (err) {
+      showFeedback("error", (err as Error).message || "Failed to save WhatsApp config.");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const getPlanIcon = (code: string) => {
     switch (code?.toUpperCase()) {
       case "STARTER":
@@ -210,7 +281,6 @@ export default function StoreSettingsPage() {
   }
 
   return (
-    <OwnerOnlyGuard>
     <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-fade-in">
       {/* HEADER CONTROLS SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-stone-900">
@@ -247,6 +317,32 @@ export default function StoreSettingsPage() {
           >
             <CreditCard className="size-3.5" />
             Billing
+          </button>
+          )}
+          {role === 'BUSINESS_OWNER' && (
+          <button
+            onClick={() => setActiveTab("whatsapp")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === "whatsapp"
+                ? "bg-[#0C0A09] text-amber-500 shadow-md border border-stone-900"
+                : "text-stone-400 hover:text-stone-200"
+            }`}
+          >
+            <MessageSquare className="size-3.5" />
+            WhatsApp
+          </button>
+          )}
+          {role === 'BUSINESS_OWNER' && (
+          <button
+            onClick={() => setActiveTab("loyalty")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === "loyalty"
+                ? "bg-[#0C0A09] text-amber-500 shadow-md border border-stone-900"
+                : "text-stone-400 hover:text-stone-200"
+            }`}
+          >
+            <Ticket className="size-3.5" />
+            Loyalty
           </button>
           )}
         </div>
@@ -581,7 +677,7 @@ export default function StoreSettingsPage() {
             </form>
           </Card>
         </div>
-      ) : (
+      ) : activeTab === "billing" ? (
         <div className="space-y-8 animate-fade-in">
           {/* SUBSCRIPTION SUMMARY BANNER LAYOUT */}
           <Card className="border-stone-800/40 bg-gradient-to-r from-stone-950 to-[#191512] rounded-2xl relative overflow-hidden shadow-xl">
@@ -716,8 +812,154 @@ export default function StoreSettingsPage() {
             })}
           </div>
         </div>
+      ) : activeTab === "loyalty" ? (
+        <div className="space-y-8 animate-fade-in">
+          <Card className="border-stone-900 bg-[#14100E] rounded-2xl overflow-hidden shadow-2xl relative">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+            <CardHeader className="bg-stone-950/20 p-6 sm:p-8 border-b border-stone-900/60 flex flex-row items-start gap-4 space-y-0">
+              <div className="size-10 rounded-xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                <Ticket className="size-4 stroke-[2]" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-black text-stone-100 tracking-wider font-mono uppercase">Loyalty Program</CardTitle>
+                <CardDescription className="text-stone-400 text-xs mt-0.5">Configure your stamp program rules and reward settings.</CardDescription>
+              </div>
+            </CardHeader>
+            <form onSubmit={handleLoyaltyProgram}>
+              <CardContent className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 bg-stone-950/[0.05]">
+                <div className="space-y-2">
+                  <Label htmlFor="lpTitle" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">Program Title</Label>
+                  <Input id="lpTitle" value={loyaltyForm.title} onChange={e => setLoyaltyForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g. Coffee Loyalty" required
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lpStamps" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">Stamps Required for Reward</Label>
+                  <Input id="lpStamps" type="number" min={1} max={50} value={loyaltyForm.stampsRequired}
+                    onChange={e => setLoyaltyForm(f => ({ ...f, stampsRequired: parseInt(e.target.value) || 10 }))} required
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lpRewardTitle" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">Reward Title</Label>
+                  <Input id="lpRewardTitle" value={loyaltyForm.rewardTitle} onChange={e => setLoyaltyForm(f => ({ ...f, rewardTitle: e.target.value }))}
+                    placeholder="e.g. Free Coffee" required
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lpRewardDesc" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">Reward Description <span className="text-stone-600 font-normal normal-case">(optional)</span></Label>
+                  <Input id="lpRewardDesc" value={loyaltyForm.rewardDescription} onChange={e => setLoyaltyForm(f => ({ ...f, rewardDescription: e.target.value }))}
+                    placeholder="e.g. Any size, any drink"
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="lpExpiry" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">
+                    Stamp Expiry <span className="text-stone-600 font-normal normal-case">(days of inactivity before stamps reset — 0 = never expire)</span>
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Input id="lpExpiry" type="number" min={0} max={3650} value={loyaltyForm.stampExpiryDays}
+                      onChange={e => setLoyaltyForm(f => ({ ...f, stampExpiryDays: parseInt(e.target.value) || 0 }))}
+                      className="h-11 w-32 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500" />
+                    <span className="text-xs text-stone-500">{loyaltyForm.stampExpiryDays === 0 ? "Stamps never expire" : `Stamps reset after ${loyaltyForm.stampExpiryDays} days of inactivity`}</span>
+                  </div>
+                  <p className="text-[10px] text-stone-600">Common values: 90 days (3 months), 180 days (6 months), 365 days (1 year).</p>
+                </div>
+              </CardContent>
+              <CardFooter className="bg-[#0C0A09]/30 border-t border-stone-900/60 px-6 sm:px-8 py-4 flex justify-end">
+                <Button type="submit" disabled={updating !== null}
+                  className="h-10 px-5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs rounded-xl flex items-center gap-2">
+                  {updating === "loyalty" ? <Loader2 className="size-3.5 animate-spin" /> : <Ticket className="size-3.5" />}
+                  Save Program Settings
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      ) : (
+        <div className="space-y-8 animate-fade-in">
+          <Card className="border-stone-900 bg-[#14100E] rounded-2xl overflow-hidden shadow-2xl relative">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+            <CardHeader className="bg-stone-950/20 p-6 sm:p-8 border-b border-stone-900/60 flex flex-row items-start gap-4 space-y-0">
+              <div className="size-10 rounded-xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                <MessageSquare className="size-4 stroke-[2]" />
+              </div>
+              <div className="flex-1 flex items-start justify-between gap-3">
+                <div>
+                  <CardTitle className="text-sm font-black text-stone-100 tracking-wider font-mono uppercase">
+                    WhatsApp Configuration
+                  </CardTitle>
+                  <CardDescription className="text-stone-400 text-xs mt-0.5">
+                    Connect your WhatsApp Business account to send loyalty notifications.
+                  </CardDescription>
+                </div>
+                {waConfigured && (
+                  <span className="text-[9px] px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-black uppercase tracking-wider shrink-0">
+                    Configured
+                  </span>
+                )}
+              </div>
+            </CardHeader>
+            <form onSubmit={handleWaConfig}>
+              <CardContent className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 bg-stone-950/[0.05]">
+                <div className="space-y-2">
+                  <Label htmlFor="waPhoneNumberId" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">
+                    Phone Number ID
+                  </Label>
+                  <Input
+                    id="waPhoneNumberId"
+                    value={waPhoneNumberId}
+                    onChange={(e) => setWaPhoneNumberId(e.target.value)}
+                    placeholder="e.g. 123456789012345"
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500 placeholder:text-stone-700"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="waToken" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">
+                    Access Token
+                  </Label>
+                  <Input
+                    id="waToken"
+                    type="password"
+                    value={waToken}
+                    onChange={(e) => setWaToken(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="waSecret" className="text-xs font-black text-stone-400 uppercase tracking-wider font-mono">
+                    Webhook Secret <span className="text-stone-600 normal-case font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="waSecret"
+                    type="password"
+                    value={waSecret}
+                    onChange={(e) => setWaSecret(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="h-11 rounded-xl bg-[#0C0A09] border-stone-800/80 text-stone-100 text-xs focus-visible:ring-amber-500"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="bg-[#0C0A09]/30 border-t border-stone-900/60 px-6 sm:px-8 py-4 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={updating !== null}
+                  className="h-10 px-5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs rounded-xl flex items-center gap-2"
+                >
+                  {updating === "waconfig" ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <MessageSquare className="size-3.5" />
+                  )}
+                  Save WA Config
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
       )}
     </div>
-    </OwnerOnlyGuard>
   );
 }
+
